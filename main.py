@@ -1,5 +1,6 @@
 from typing import TypedDict
 from fastapi import FastAPI
+import json
 
 app = FastAPI()
 
@@ -7,33 +8,23 @@ class Message(TypedDict):
     name: str
     content: str
     
-sampleData: list[Message] = [
-    {"name": "Christye", "content": "Vivamus in felis eu sapien cursus vestibulum."},
-    {"name": "Guthrie", "content": "Nulla ac enim."},
-    {"name": "Mela", "content": "Sed accumsan felis."},
-    {"name": "Fax", "content": "Morbi a ipsum."},
-    {"name": "Liane", "content": "Suspendisse potenti."},
-    {"name": "Ed", "content": "Vestibulum anteorci cubilia Curae; Duis faucibus accumsan odio."},
-    {"name": "Daniella", "content": "Morbi non quam nec dui luctus rutrum."},
-    {"name": "Legra", "content": "In congue."},
-    {"name": "Benedetta", "content": "Vivamus vel nulla eget eros elementum pellentesque."},
-    {"name": "Sada", "content": "Quisque erat eros, viverra eget, congue eget, semper rutrum, nulla."},
-]
+with open('data.json', 'r') as f:
+    data: list[Message] = json.load(f)
 
-# def get_message():
-#     for message in sampleData:
-#         print(message.name)
+def get_message(author: str):
+    for message in data:
+        if author == message.get('name'):
+            return message.get('content')
         
-# get_message()
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
-@app.get("/message")
+@app.get("/messages")
 def get_messages():
-    return sampleData
+    return data
 
-# @app.get("/messages/{writer}")
-# def read_message(writer: str):
-#     return {"name": writer, "message": ""}
+@app.get("/messages/{author}")
+def read_message(author: str):
+    author = author.capitalize()
+    return {"name": author, "message": f'{get_message(author)}'}
